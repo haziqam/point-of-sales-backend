@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from adapters.http.controllers.AuthController import AuthController, AuthService
+from adapters.http.controllers.example import ExampleController, ExampleService
 
 app = FastAPI()
 
@@ -8,9 +8,9 @@ app = FastAPI()
 def health():
     return {"Hello": "World"}
 
-auth_controller = AuthController()
-auth_controller.set_auth_service(AuthService(10))
-app.include_router(auth_controller)
+example_controller = ExampleController()
+example_controller.set_example_service(ExampleService(10))
+app.include_router(example_controller)
 
 
 
