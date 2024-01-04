@@ -5,21 +5,21 @@ from core.models.user import Role, User
 
 class IUserRepository(ABC):
     @abstractmethod
-    def create_user(name: str, role: Role, email: str, hashed_password: str) -> User:
+    def create_user(self, name: str, role: Role, email: str, hashed_password: str) -> User:
         pass
 
     @abstractmethod
-    def find_user_by_id(id: str) -> Optional[User]:
+    def find_user_by_id(self, id: str) -> Optional[User]:
         pass
 
     @abstractmethod
-    def find_user_by_email(email: str) -> Optional[User]:
+    def find_user_by_email(self, email: str) -> Optional[User]:
         pass
 
     @abstractmethod
-    def update_user(user: User) -> User:
+    def update_user(self, user: User) -> User:
         pass
 
     @abstractmethod
-    def delete_user(user:User) -> None:
+    def delete_user(self, user:User) -> None:
         pass
