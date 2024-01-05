@@ -6,5 +6,5 @@ class IPasswordHasher(ABC):
         pass
 
     @abstractmethod
-    def verify(entered_password: str, stored_password: str) -> bool:
+    def verify(self, entered_password: str, stored_password: str) -> bool:
         pass

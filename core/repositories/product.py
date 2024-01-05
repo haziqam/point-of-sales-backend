@@ -14,7 +14,8 @@ class IProductRepository(ABC):
 
     @abstractmethod
     def find_products(self, page: int = 1, number_per_page: int = 10, *, 
-            name: str, description: str, price: float, stock: int) -> List[Product]:
+                      name: Optional[str] = None, description: Optional[str] = None, 
+                      price: Optional[float] = None, stock: Optional[int] = None) -> List[Product]:
         pass
 
     @abstractmethod
