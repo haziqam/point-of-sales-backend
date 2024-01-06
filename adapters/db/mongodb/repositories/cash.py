@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class ICashRepository(ABC):
     @abstractmethod
     def get_cash(self, **kwargs) -> float:
@@ -16,4 +15,4 @@ class ICashRepository(ABC):
 
     @abstractmethod
     def is_sufficient(self, amount: float, **kwargs) -> bool:
-        pass
+        pass 

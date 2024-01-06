@@ -1,19 +1,21 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, validator
 
-from utils.singleton import SingletonMeta
 
 class PublicExampleData(BaseModel):
     id: int
     role: str
 
+
 class ExampleModel(BaseModel):
     public_data: PublicExampleData
     hashed_password: str
 
+
 # just an example
 userData = PublicExampleData(id=10, role="Manager")
 user = ExampleModel(public_data=userData, hashed_password="ajuq83920v")
+
 
 class ExampleCredentialsSchema(BaseModel):
     email: str
@@ -26,6 +28,7 @@ class ExampleCredentialsSchema(BaseModel):
             raise ValueError("Only email addresses from example.com are allowed")
         return value
 
+
 class ExampleService:
     def __init__(self, a) -> None:
         self.a = a
@@ -33,22 +36,20 @@ class ExampleService:
     def printa(self):
         print(self.a)
 
-class ExampleController(APIRouter, metaclass=SingletonMeta):
+
+class ExampleController(APIRouter):
     def __init__(self, example_service: ExampleService) -> None:
         super().__init__(prefix="/exampleAuth")
-        self._example_service = example_service
-        
-    def set_example_service(self, example_service: ExampleService):
-        self._example_service = example_service
+        self.example_service = example_service
+        self.assign_routes()
 
-example_controller = ExampleController(example_service=None)
+    def assign_routes(self) -> None:
+        @self.post("/register")
+        async def register(credentials: ExampleCredentialsSchema):
+            self.example_service.printa()
+            return user.public_data
 
-@example_controller.post("/register")
-async def register(credentials: ExampleCredentialsSchema):
-    example_controller.example_service.printa()
-    return user.public_data
-
-@example_controller.get("/login")
-async def login():
-    example_controller.example_service.printa()
-    return user.public_data
+        @self.get("/login")
+        async def login():
+            self.example_service.printa()
+            return user.public_data

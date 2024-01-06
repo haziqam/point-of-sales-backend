@@ -2,12 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from core.models.user import Role, User
 
-
 class IUserRepository(ABC):
     @abstractmethod
-    def create_user(
-        self, name: str, role: Role, email: str, hashed_password: str, **kwargs
-    ) -> User:
+    def create_user(self, name: str, role: Role, email: str, hashed_password: str, **kwargs) -> User:
         pass
 
     @abstractmethod
@@ -23,5 +20,5 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_user(self, user: User, **kwargs) -> None:
+    def delete_user(self, user:User, **kwargs) -> None:
         pass

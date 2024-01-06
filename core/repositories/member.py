@@ -5,7 +5,9 @@ from core.models.member import Member
 
 class IMemberRepository(ABC):
     @abstractmethod
-    def create_member(self, email: str, hashed_PIN: str, name: str, points: float = 0.0, **kwargs) -> Member:
+    def create_member(
+        self, email: str, hashed_PIN: str, name: str, points: float = 0.0, **kwargs
+    ) -> Member:
         pass
 
     @abstractmethod
