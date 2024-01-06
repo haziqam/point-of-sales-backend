@@ -2,7 +2,11 @@ from typing import Optional, Tuple
 from core.models.member import Member, PublicMemberData, VIPMember
 from core.repositories.member import IMemberRepository
 from security.hasher import IPasswordHasher
-from exceptions.auth_exception import InvalidCredentials, UserNotFound
+from exceptions.auth_exception import (
+    InvalidCredentials,
+    UserAlreadyExists,
+    UserNotFound,
+)
 
 
 class MemberService:
@@ -15,14 +19,20 @@ class MemberService:
     def find_member_by_id(self, id: str) -> Optional[Member]:
         return self.member_repository.find_member_by_id(id)
 
-    def register(self, email: str, PIN: str, name: str, **kwargs) -> PublicMemberData:
+    def register(self, email: str, PIN: str, name: str) -> PublicMemberData:
+        """
+        Raises:
+        * UserAlreadyExists
+        """
+        existing_member = self.member_repository.find_member_by_email(email)
+        if existing_member is not None:
+            raise UserAlreadyExists()
+
         hashed_PIN = self.PIN_hasher.hash(PIN)
-        new_member = self.member_repository.create_member(
-            email, hashed_PIN, name, **kwargs
-        )
+        new_member = self.member_repository.create_member(email, hashed_PIN, name)
         return new_member.public_data
 
-    def _login(self, email: str, PIN: str, **kwargs) -> Tuple[PublicMemberData, str]:
+    def login(self, email: str, PIN: str) -> Tuple[PublicMemberData, str]:
         """
         Returns:
             A tuple containing the public member data
@@ -32,7 +42,7 @@ class MemberService:
         * UserNotFound
         * InvalidCredentials
         """
-        matching_member = self.member_repository.find_member_by_email(email, **kwargs)
+        matching_member = self.member_repository.find_member_by_email(email)
         if matching_member is None:
             raise UserNotFound()
 
@@ -46,6 +56,15 @@ class MemberService:
         vip_member = VIPMember.from_member(member)
         self.member_repository.update_member(vip_member)
         return vip_member.public_data, vip_member.get_member_type()
+
+    def cancel_VIP(self, member: Member) -> Tuple[PublicMemberData, str]:
+        member = Member(
+            public_data=member.public_data,
+            email=member.email,
+            hashed_PIN=member.hashed_PIN,
+        )
+        self.member_repository.update_member(member)
+        return member.public_data, member.get_member_type()
 
     def delete_member(self, member: Member) -> None:
         self.member_repository.delete_member(member)

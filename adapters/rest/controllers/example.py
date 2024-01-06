@@ -41,9 +41,9 @@ class ExampleController(APIRouter):
     def __init__(self, example_service: ExampleService) -> None:
         super().__init__(prefix="/exampleAuth")
         self.example_service = example_service
-        self.assign_routes()
+        self._assign_routes()
 
-    def assign_routes(self) -> None:
+    def _assign_routes(self) -> None:
         @self.post("/register")
         async def register(credentials: ExampleCredentialsSchema):
             self.example_service.printa()
