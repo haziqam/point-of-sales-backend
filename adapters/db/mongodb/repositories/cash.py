@@ -1,18 +1,28 @@
-from abc import ABC, abstractmethod
+from typing import cast
+from pymongo.collection import Collection
+from adapters.db.mongodb.base_repository import MongoDBRepository
+from core.repositories.cash import ICashRepository
 
-class ICashRepository(ABC):
-    @abstractmethod
+
+class CashRepository(ICashRepository, MongoDBRepository):
     def get_cash(self, **kwargs) -> float:
-        pass
+        result = self.collection.find_one()
+        if result is not None:
+            return cast(float, result["cash"])
+        return 0.0
 
-    @abstractmethod
     def add_cash(self, amount: float, **kwargs) -> None:
-        pass
+        current_cash = self.get_cash()
+        self.collection.update_one(
+            {}, {"$set": {"cash": current_cash + amount}}, upsert=True
+        )
 
-    @abstractmethod
     def subtract_cash(self, amount: float, **kwargs) -> None:
-        pass
+        current_cash = self.get_cash()
+        self.collection.update_one(
+            {}, {"$set": {"cash": current_cash - amount}}, upsert=True
+        )
 
-    @abstractmethod
     def is_sufficient(self, amount: float, **kwargs) -> bool:
-        pass 
+        current_cash = self.get_cash()
+        return current_cash >= amount
