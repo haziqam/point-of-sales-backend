@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 
 class Role(Enum):
-    CASHIER = "cashier"
-    MANAGER = "manager"
+    CASHIER = "CASHIER"
+    MANAGER = "MANAGER"
 
 
 class PublicUserData(BaseModel):
