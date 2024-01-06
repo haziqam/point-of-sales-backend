@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 
-# TODO: move somewhere
-
 
 class PublicMemberData(BaseModel):
     id: str
@@ -29,7 +27,7 @@ class VIPMember(Member):
     discount_rate: float
 
     @classmethod
-    def upgrade_from_member(
+    def from_member(
         cls, member: Member, discount_rate: float = DEFAULT_DISCOUNT_RATE
     ) -> "VIPMember":
         return cls(
