@@ -11,7 +11,6 @@ from exceptions.auth_exception import (
 
 
 class UserRegistrationSchema(BaseModel):
-    id: str
     name: str
     role: str
     email: str
