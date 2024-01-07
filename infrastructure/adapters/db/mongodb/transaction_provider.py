@@ -14,10 +14,7 @@ class MongoDBTransactionProvider(ITransactionProvider):
     def transact(self, callback: Callable[..., T]) -> Optional[T]:
         retval = None
         with self.client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    retval = callback(session=session)
-            except Exception as e:
-                print(f"Failed to complete transaction: {str(e)}")
+            with session.start_transaction():
+                retval = callback(session=session)
 
         return retval

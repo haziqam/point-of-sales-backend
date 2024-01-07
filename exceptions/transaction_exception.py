@@ -1,6 +1,10 @@
-class InsufficientStock(Exception):
+class TransactionException(Exception):
     pass
 
 
-class InsufficientPoint(Exception):
+class InsufficientStock(TransactionException):
+    pass
+
+
+class InsufficientPoint(TransactionException):
     pass

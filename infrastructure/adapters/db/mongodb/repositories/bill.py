@@ -27,7 +27,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
             }
         )
         bill = Bill(
-            id=result.inserted_id,
+            id=str(result.inserted_id),
             transaction_date=transaction_date,
             purchased_products=purchased_products,
             subtotal_price=subtotal_price,

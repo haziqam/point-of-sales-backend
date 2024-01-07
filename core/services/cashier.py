@@ -10,7 +10,6 @@ from core.repositories.cash import ICashRepository
 from exceptions.transaction_exception import InsufficientPoint, InsufficientStock
 from transaction.transaction_provider import ITransactionProvider
 
-TAX_RATE = 0.01
 POINT_MULTIPLIER = 0.15
 
 
@@ -35,7 +34,7 @@ class CashierService:
         purchased_products: List[PurchasedProduct] = []
         for product, amount in products_to_purchase:
             if product.stock < amount:
-                raise InsufficientStock()
+                raise InsufficientStock("Product stock not sufficient")
 
             product.stock -= amount
             self.product_repository.update_product(product, **kwargs)
@@ -67,7 +66,7 @@ class CashierService:
         self, member: Member, points_used: float, subtotal_price: float, **kwargs
     ) -> None:
         if member.public_data.points < points_used:
-            raise InsufficientPoint()
+            raise InsufficientPoint("Points used not sufficient")
 
         if points_used > 0.0:
             member.public_data.points -= points_used
@@ -83,6 +82,37 @@ class CashierService:
         points_used: float = 0.0,
         **kwargs
     ) -> Bill:
+        purchased_products = self._process_products(products_to_purchase)
+        subtotal_price = self._calculate_subtotal_price(purchased_products)
+        discount = 0.0
+
+        total_price = subtotal_price
+        if member is not None:
+            total_price = self._calculate_reduced_price(
+                member, subtotal_price, points_used
+            )
+            discount = self._get_discount_amount(member)
+            self._processs_member_data(member, points_used, subtotal_price)
+
+        self.cash_repository.add_cash(total_price, **kwargs)
+
+        bill = self.bill_repository.create_bill(
+            str(datetime.now()),
+            purchased_products,
+            subtotal_price,
+            total_price,
+            points_used,
+            discount,
+            **kwargs
+        )
+        return bill
+
+    def purchase(
+        self,
+        products_to_purchase: List[Tuple[Product, int]],
+        member: Optional[Member],
+        points_used: float = 0.0,
+    ) -> Bill:
         """
         Parameters
         * products_to_purchase: List of tuples containing the product and the amount to purchcase
@@ -96,38 +126,6 @@ class CashierService:
         * InsufficientStock
         * InsufficientPoint
         """
-        purchased_products = self._process_products(products_to_purchase)
-        subtotal_price = self._calculate_subtotal_price(purchased_products)
-        discount = 0.0
-
-        if member is not None:
-            subtotal_price = self._calculate_reduced_price(
-                member, subtotal_price, points_used
-            )
-            discount = self._get_discount_amount(member)
-            self._processs_member_data(member, points_used, subtotal_price)
-
-        total_price = subtotal_price
-        self.cash_repository.add_cash(total_price, **kwargs)
-
-        bill = self.bill_repository.create_bill(
-            str(datetime.now()),
-            purchased_products,
-            subtotal_price,
-            total_price,
-            points_used,
-            discount,
-            **kwargs
-        )
-
-        return bill
-
-    def purchase(
-        self,
-        products_to_purchase: List[Tuple[Product, int]],
-        member: Optional[Member],
-        points_used: float = 0.0,
-    ) -> Bill:
         callback = lambda **kwargs: self._purchase(
             products_to_purchase, member, points_used, **kwargs
         )

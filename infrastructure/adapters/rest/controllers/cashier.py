@@ -6,6 +6,7 @@ from core.models.product import Product
 from core.services.cashier import CashierService
 from core.services.inventory import InventoryService
 from core.services.member import MemberService
+from exceptions.transaction_exception import TransactionException
 
 
 class ProductPurchaseSchema(BaseModel):
@@ -34,7 +35,7 @@ class CashierController(APIRouter):
 
     def _assign_routes(self):
         @self.post("/payment")
-        async def purchase(schema: PurchaseSchema):
+        async def purchase(schema: PurchaseSchema) -> Bill:
             products_to_purchase: List[Tuple[Product, int]] = []
             for product in schema.products:
                 found_product = self.inventory_service.find_product_by_id(product.id)
@@ -58,4 +59,12 @@ class CashierController(APIRouter):
                 if schema.points_used is not None:
                     points_used = schema.points_used
 
-            self.cashier_service.purchase(products_to_purchase, member, points_used)
+            try:
+                bill = self.cashier_service.purchase(
+                    products_to_purchase, member, points_used
+                )
+                return bill
+            except TransactionException as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Unable to complete transaction: {str(e)}"
+                )
