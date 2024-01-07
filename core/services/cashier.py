@@ -57,9 +57,9 @@ class CashierService:
     ) -> float:
         return member.convert_price(subtotal_price, points_used)
 
-    def _get_discount_amount(self, member: Member) -> float:
-        if member.get_member_type == "VIP Member":
-            return cast(VIPMember, member).discount_rate
+    def _get_discount_amount(self, member: Member, subtotal_price: float) -> float:
+        if member.get_member_type() == "VIP Member":
+            return cast(VIPMember, member).discount_rate * subtotal_price
         return 0.0
 
     def _processs_member_data(
@@ -91,7 +91,7 @@ class CashierService:
             total_price = self._calculate_reduced_price(
                 member, subtotal_price, points_used
             )
-            discount = self._get_discount_amount(member)
+            discount = self._get_discount_amount(member, subtotal_price)
             self._processs_member_data(member, points_used, subtotal_price)
 
         self.cash_repository.add_cash(total_price, **kwargs)
