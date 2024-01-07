@@ -71,4 +71,4 @@ class ProductRepository(IProductRepository, MongoDBRepository):
         return product
 
     def delete_product(self, product: Product, **kwargs) -> None:
-        self.collection.delete_one({"_id": product.id})
+        self.collection.delete_one({"_id": ObjectId(product.id)})
