@@ -64,13 +64,13 @@ class MemberController(APIRouter):
             except InvalidCredentials:
                 raise HTTPException(status_code=404, detail="Wrong password")
 
-        @self.put("/{id}/VIP-subscription")
+        @self.put("/{id}/vip-subscription")
         async def upgrade_to_VIP(id: str) -> Dict[str, Any]:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.upgrade_to_VIP(member)
             return {"public_data": public_data, "member_type": member_type}
 
-        @self.delete("/{id}/VIP-subscription")
+        @self.delete("/{id}/vip-subscription")
         async def cancel_VIP(id: str) -> Dict[str, Any]:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.cancel_VIP(member)
