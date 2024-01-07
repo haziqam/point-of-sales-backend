@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pymongo.cursor import Cursor
 from bson import ObjectId
-from adapters.db.mongodb.base_repository import MongoDBRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.product import Product
 from core.repositories.product import IProductRepository
 

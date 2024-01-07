@@ -58,9 +58,6 @@ class CashierService:
     ) -> float:
         return member.convert_price(subtotal_price, points_used)
 
-    def _calculate_taxed_price(self, subtotal_price: float) -> float:
-        return subtotal_price * (1 + TAX_RATE)
-
     def _get_discount_amount(self, member: Member) -> float:
         if member.get_member_type == "VIP Member":
             return cast(VIPMember, member).discount_rate
@@ -110,7 +107,7 @@ class CashierService:
             discount = self._get_discount_amount(member)
             self._processs_member_data(member, points_used, subtotal_price)
 
-        total_price = self._calculate_taxed_price(subtotal_price)
+        total_price = subtotal_price
         self.cash_repository.add_cash(total_price, **kwargs)
 
         bill = self.bill_repository.create_bill(

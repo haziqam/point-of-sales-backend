@@ -1,7 +1,7 @@
 from typing import Optional
 
 from bson import ObjectId
-from adapters.db.mongodb.base_repository import MongoDBRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.user import PublicUserData, Role, User
 from core.repositories.user import IUserRepository
 

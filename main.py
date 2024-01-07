@@ -1,10 +1,16 @@
 from fastapi import FastAPI
-from adapters.db.mongodb.repositories.cash import CashRepository
-from adapters.db.mongodb.repositories.member import MemberRepository
-from adapters.db.mongodb.repositories.product import ProductRepository
-from adapters.db.mongodb.repositories.user import UserRepository
-from adapters.db.mongodb.transaction_provider import MongoDBTransactionProvider
-from adapters.rest.controllers.example import ExampleController, ExampleService
+from core.models.product import PurchasedProduct
+from infrastructure.adapters.db.mongodb.repositories.cash import CashRepository
+from infrastructure.adapters.db.mongodb.repositories.member import MemberRepository
+from infrastructure.adapters.db.mongodb.repositories.product import ProductRepository
+from infrastructure.adapters.db.mongodb.repositories.user import UserRepository
+from infrastructure.adapters.db.mongodb.transaction_provider import (
+    MongoDBTransactionProvider,
+)
+from infrastructure.adapters.rest.controllers.example import (
+    ExampleController,
+    ExampleService,
+)
 from core.models.user import User, Role
 
 from pymongo import MongoClient
@@ -28,6 +34,16 @@ member_repository = MemberRepository(member_collection)
 #     print(member.dict())
 
 user_repository = UserRepository(db.user)
+# a = [
+#     PurchasedProduct(
+#         id="12", name="haziq", description="ahahah", price=10.9, amount=12
+#     ),
+#     PurchasedProduct(
+#         id="13", name="haziq1111", description="ahahah", price=10.9, amount=12
+#     ),
+# ]
+
+# baru_collection.insert_one({"hwllo": "world", "a": list(map(lambda e: e.dict(), a))})
 # user_repository.create_user('Haziq', Role.MANAGER, 'haziq@email.com', '1234' )
 # member = member_repository.create_member(
 #     email="halodunia", hashed_PIN="1234567", name="namaku"

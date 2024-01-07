@@ -1,3 +1,4 @@
 fastapi
 bcrypt
 pymongo
+python-dotenv

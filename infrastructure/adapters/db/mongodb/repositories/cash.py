@@ -1,6 +1,6 @@
 from typing import cast
 from pymongo.collection import Collection
-from adapters.db.mongodb.base_repository import MongoDBRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.repositories.cash import ICashRepository
 
 

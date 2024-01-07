@@ -1,6 +1,6 @@
 from typing import Optional, cast
 from bson.objectid import ObjectId
-from adapters.db.mongodb.base_repository import MongoDBRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.member import Member, PublicMemberData, VIPMember
 from core.repositories.member import IMemberRepository
 
