@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from core.models.user import PublicUserData
+from core.models.user import PublicUserData, Role
 from core.services.user import UserService
 from exceptions.auth_exception import (
     InvalidCredentials,
@@ -12,7 +12,7 @@ from exceptions.auth_exception import (
 
 class UserRegistrationSchema(BaseModel):
     name: str
-    role: str
+    role: Role
     email: str
     password: str
 
