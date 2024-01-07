@@ -1,5 +1,5 @@
 from typing import List
-from adapters.db.mongodb.base_repository import MongoDBRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.bill import Bill
 from core.models.product import PurchasedProduct
 from core.repositories.bill import IBillRepository

@@ -13,10 +13,10 @@ class ProductSchema(BaseModel):
 
 
 class UpdateProductSchema(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    price: Optional[float]
-    stock: Optional[int]
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    stock: Optional[int] = None
 
 
 class ProductController(APIRouter):
@@ -44,10 +44,10 @@ class ProductController(APIRouter):
 
         @self.get("/")
         async def find_products(
-            name: Optional[str],
-            description: Optional[str],
-            price: Optional[float],
-            stock: Optional[int],
+            name: Optional[str] = None,
+            description: Optional[str] = None,
+            price: Optional[float] = None,
+            stock: Optional[int] = None,
             page: int = 1,
             number_per_page: int = 10,
         ) -> List[Product]:

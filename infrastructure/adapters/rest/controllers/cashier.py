@@ -26,6 +26,7 @@ class CashierController(APIRouter):
         inventory_service: InventoryService,
         member_service: MemberService,
     ) -> None:
+        super().__init__(prefix="/cashier")
         self.cashier_service = cashier_service
         self.inventory_service = inventory_service
         self.member_service = member_service

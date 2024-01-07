@@ -1,8 +1,8 @@
-from adapters.rest.controllers.cashier import CashierController
-from adapters.rest.controllers.member import MemberController
-from adapters.rest.controllers.product import ProductController
-from adapters.rest.controllers.report import ReportController
-from adapters.rest.controllers.user import UserController
+from infrastructure.adapters.rest.controllers.cashier import CashierController
+from infrastructure.adapters.rest.controllers.member import MemberController
+from infrastructure.adapters.rest.controllers.product import ProductController
+from infrastructure.adapters.rest.controllers.report import ReportController
+from infrastructure.adapters.rest.controllers.user import UserController
 
 
 class ControllerContainer:
