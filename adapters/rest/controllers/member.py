@@ -22,7 +22,7 @@ class MemberLoginSchema(BaseModel):
 
 
 class MemberController(APIRouter):
-    def __init__(self, member_service: MemberService):
+    def __init__(self, member_service: MemberService) -> None:
         super().__init__(prefix="/members")
         self.member_service = member_service
         self._assign_routes()
@@ -39,13 +39,11 @@ class MemberController(APIRouter):
         @self.post("/")
         async def register(schema: MemberRegistrationSchema) -> PublicMemberData:
             try:
-                return self.member_service.register(
-                    schema.email, schema.PIN, schema.name
-                )
+                return self.member_service.register(**schema.dict())
             except UserAlreadyExists:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"User with this email {schema.email} already registered",
+                    detail=f"Member with this email ({schema.email}) already registered",
                 )
 
         @self.delete("/{id}")
@@ -54,12 +52,10 @@ class MemberController(APIRouter):
             self.member_service.delete_member(member)
             return {"message": f"Member with id {id} deleted successfully"}
 
-        @self.post("/session")
+        @self.put("/session")
         async def login(schema: MemberLoginSchema) -> Dict[str, Any]:
             try:
-                public_data, member_type = self.member_service.login(
-                    schema.email, schema.PIN
-                )
+                public_data, member_type = self.member_service.login(**schema.dict())
                 return {"public_data": public_data, "member_type": member_type}
             except UserNotFound:
                 raise HTTPException(
@@ -68,13 +64,13 @@ class MemberController(APIRouter):
             except InvalidCredentials:
                 raise HTTPException(status_code=404, detail="Wrong password")
 
-        @self.post("/VIP-subscription/{id}")
+        @self.put("/{id}/VIP-subscription")
         async def upgrade_to_VIP(id: str) -> Dict[str, Any]:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.upgrade_to_VIP(member)
             return {"public_data": public_data, "member_type": member_type}
 
-        @self.delete("/VIP-subscription/{id}")
+        @self.delete("/{id}/VIP-subscription")
         async def cancel_VIP(id: str) -> Dict[str, Any]:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.cancel_VIP(member)
