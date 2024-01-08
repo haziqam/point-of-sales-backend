@@ -1,46 +1,17 @@
 from typing import Dict
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, validator
-from adapters.rest.utils.validation import validate_email, validate_password
-from core.models.user import PublicUserData, Role
+from adapters.rest.schemas.response_message import ResponseMessageSchema
+from core.models.user import PublicUserData
 from core.services.user import UserService
+from infrastructure.adapters.rest.schemas.user import (
+    UserLoginSchema,
+    UserRegistrationSchema,
+)
 from exceptions.auth_exception import (
     InvalidCredentials,
     UserAlreadyExists,
     UserNotFound,
 )
-
-
-class UserRegistrationSchema(BaseModel):
-    name: str
-    role: Role
-    email: str
-    password: str
-
-    @validator("email")
-    def validate_email(cls, value: str):
-        if validate_email(value):
-            return value
-
-    @validator("password")
-    def validate_password(cls, value: str):
-        if validate_password(value):
-            return value
-
-
-class UserLoginSchema(BaseModel):
-    email: str
-    password: str
-
-    @validator("email")
-    def validate_email(cls, value: str):
-        if validate_email(value):
-            return value
-
-    @validator("password")
-    def validate_password(cls, value: str):
-        if validate_password(value):
-            return value
 
 
 class UserController(APIRouter):
@@ -73,7 +44,7 @@ class UserController(APIRouter):
                 raise HTTPException(status_code=400, detail=f"Wrong password")
 
         @self.delete("/")
-        async def delete_user(id: str) -> Dict[str, str]:
+        async def delete_user(id: str) -> ResponseMessageSchema:
             user = self.user_service.find_user_by_id(id)
             if user is None:
                 raise HTTPException(
@@ -81,4 +52,6 @@ class UserController(APIRouter):
                 )
 
             self.user_service.delete_user(user)
-            return {"message": f"User with id {id} deleted successfully"}
+            return ResponseMessageSchema(
+                message=f"User with id {id} deleted successfully"
+            )

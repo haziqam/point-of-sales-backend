@@ -5,7 +5,7 @@ MIN_PASSWORD_LENGTH = 8
 
 
 def validate_email(email: str) -> bool:
-    match = re.match(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", email)
+    match = re.match(r"^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$", email)
     if match is None:
         raise ValueError("Invalid email format")
     return True

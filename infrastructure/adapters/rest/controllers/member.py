@@ -1,45 +1,19 @@
 from typing import Any, Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
-from adapters.rest.utils.validation import validate_PIN, validate_email
+from adapters.rest.schemas.response_message import ResponseMessageSchema
 from core.models.member import Member, PublicMemberData
 from core.services.member import MemberService
+from infrastructure.adapters.rest.schemas.member import (
+    MemberDataSchema,
+    MemberLoginSchema,
+    MemberRegistrationSchema,
+)
 from exceptions.auth_exception import (
     InvalidCredentials,
     UserAlreadyExists,
     UserNotFound,
 )
-
-
-class MemberRegistrationSchema(BaseModel):
-    email: str
-    PIN: str
-    name: str
-
-    @validator("email")
-    def validate_email(cls, value: str):
-        if validate_email(value):
-            return value
-
-    @validator("PIN")
-    def validate_password(cls, value: str):
-        if validate_PIN(value):
-            return value
-
-
-class MemberLoginSchema(BaseModel):
-    email: str
-    PIN: str
-
-    @validator("email")
-    def validate_email(cls, value: str):
-        if validate_email(value):
-            return value
-
-    @validator("PIN")
-    def validate_password(cls, value: str):
-        if validate_PIN(value):
-            return value
 
 
 class MemberController(APIRouter):
@@ -68,16 +42,20 @@ class MemberController(APIRouter):
                 )
 
         @self.delete("/{id}")
-        async def delete_member(id: str) -> Dict[str, str]:
+        async def delete_member(id: str) -> ResponseMessageSchema:
             member = self._check_member_id(id)
             self.member_service.delete_member(member)
-            return {"message": f"Member with id {id} deleted successfully"}
+            return ResponseMessageSchema(
+                message=f"Member with id {id} deleted successfully"
+            )
 
         @self.put("/session")
-        async def login(schema: MemberLoginSchema) -> Dict[str, Any]:
+        async def login(schema: MemberLoginSchema) -> MemberDataSchema:
             try:
                 public_data, member_type = self.member_service.login(**schema.dict())
-                return {"public_data": public_data, "member_type": member_type}
+                return MemberDataSchema(
+                    public_data=public_data, member_type=member_type
+                )
             except UserNotFound:
                 raise HTTPException(
                     status_code=404, detail=f"User with email {schema.email} not found"
@@ -86,13 +64,13 @@ class MemberController(APIRouter):
                 raise HTTPException(status_code=404, detail="Wrong password")
 
         @self.put("/{id}/vip-subscription")
-        async def upgrade_to_VIP(id: str) -> Dict[str, Any]:
+        async def upgrade_to_VIP(id: str) -> MemberDataSchema:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.upgrade_to_VIP(member)
-            return {"public_data": public_data, "member_type": member_type}
+            return MemberDataSchema(public_data=public_data, member_type=member_type)
 
         @self.delete("/{id}/vip-subscription")
-        async def cancel_VIP(id: str) -> Dict[str, Any]:
+        async def cancel_VIP(id: str) -> MemberDataSchema:
             member = self._check_member_id(id)
             public_data, member_type = self.member_service.cancel_VIP(member)
-            return {"public_data": public_data, "member_type": member_type}
+            return MemberDataSchema(public_data=public_data, member_type=member_type)
