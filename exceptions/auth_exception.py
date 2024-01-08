@@ -8,3 +8,11 @@ class UserAlreadyExists(Exception):
 
 class InvalidCredentials(Exception):
     pass
+
+
+class InvalidToken(Exception):
+    pass
+
+
+class ExpiredToken(Exception):
+    pass
