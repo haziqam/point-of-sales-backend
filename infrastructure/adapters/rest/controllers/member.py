@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from adapters.rest.utils.validation import validate_PIN, validate_email
 from core.models.member import Member, PublicMemberData
 from core.services.member import MemberService
 from exceptions.auth_exception import (
@@ -15,10 +16,30 @@ class MemberRegistrationSchema(BaseModel):
     PIN: str
     name: str
 
+    @validator("email")
+    def validate_email(cls, value: str):
+        if validate_email(value):
+            return value
+
+    @validator("PIN")
+    def validate_password(cls, value: str):
+        if validate_PIN(value):
+            return value
+
 
 class MemberLoginSchema(BaseModel):
     email: str
     PIN: str
+
+    @validator("email")
+    def validate_email(cls, value: str):
+        if validate_email(value):
+            return value
+
+    @validator("PIN")
+    def validate_password(cls, value: str):
+        if validate_PIN(value):
+            return value
 
 
 class MemberController(APIRouter):

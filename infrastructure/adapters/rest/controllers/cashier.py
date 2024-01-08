@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from core.models.bill import Bill
 from core.models.product import Product
 from core.services.cashier import CashierService
@@ -13,11 +13,21 @@ class ProductPurchaseSchema(BaseModel):
     id: str
     amount: int
 
+    @validator("amount")
+    def validate_amount(cls, value: int):
+        if value <= 0:
+            raise ValueError("Product amount must be at least one")
+
 
 class PurchaseSchema(BaseModel):
     products: List[ProductPurchaseSchema]
     member_id: Optional[str]
     points_used: Optional[float]
+
+    @validator("points_used")
+    def validate_points_used(cls, value: Optional[float]):
+        if value is not None and value < 0:
+            raise ValueError("Negative points are not allowed")
 
 
 class CashierController(APIRouter):

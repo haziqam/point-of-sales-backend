@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from core.models.product import Product
 from core.services.inventory import InventoryService
 
@@ -11,12 +11,32 @@ class ProductSchema(BaseModel):
     price: float
     stock: int
 
+    @validator("price")
+    def validate_price(cls, value):
+        if value < 0:
+            raise ValueError("Price cannot be negative")
+
+    @validator("stock")
+    def validate_stock(cls, value):
+        if value < 0:
+            raise ValueError("Stock cannot be negative")
+
 
 class UpdateProductSchema(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     price: Optional[float] = None
     stock: Optional[int] = None
+
+    @validator("price")
+    def validate_price(cls, value):
+        if value < 0:
+            raise ValueError("Price cannot be negative")
+
+    @validator("stock")
+    def validate_stock(cls, value):
+        if value < 0:
+            raise ValueError("Stock cannot be negative")
 
 
 class ProductController(APIRouter):
