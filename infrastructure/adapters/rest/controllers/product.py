@@ -1,5 +1,6 @@
+import os
 from typing import Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from core.models.product import Product
 from core.services.inventory import InventoryService
 from infrastructure.adapters.rest.middlewares.manager_auth import (
@@ -9,6 +10,9 @@ from infrastructure.adapters.rest.schemas.product import (
     ProductSchema,
     UpdateProductSchema,
 )
+from infrastructure.adapters.rest.utils.file_writer import delete_file, write_file
+
+PRODUCT_IMAGE_PATH = "static/product/images"
 
 
 class ProductController(APIRouter):
@@ -27,8 +31,26 @@ class ProductController(APIRouter):
 
     def _assign_routes(self):
         @self.post("/", dependencies=[Depends(manager_auth_middleware)])
-        async def insert_product(schema: ProductSchema, request: Request) -> Product:
-            return self.inventory_service.insert_product(**schema.dict())
+        async def insert_product(
+            request: Request,
+            name: str = Form(...),
+            description: str = Form(...),
+            price: float = Form(...),
+            stock: int = Form(...),
+            image: UploadFile = File(...),
+        ) -> Product:
+            try:
+                schema = ProductSchema(
+                    name=name, description=description, price=price, stock=stock
+                )
+                product = self.inventory_service.insert_product(**schema.dict())
+                if image.filename is not None:
+                    ext = os.path.splitext(image.filename)[1]
+                    write_file(image, f"{PRODUCT_IMAGE_PATH}/{product.id}{ext}")
+
+                return product
+            except ValueError as e:
+                raise HTTPException(status_code=422, detail=str(e))
 
         @self.get("/{id}", dependencies=[Depends(manager_auth_middleware)])
         async def find_product_by_id(id: str) -> Product:
@@ -55,20 +77,39 @@ class ProductController(APIRouter):
 
         @self.patch("/{id}", dependencies=[Depends(manager_auth_middleware)])
         async def update_product(
-            id: str, schema: UpdateProductSchema, request: Request
+            id: str,
+            request: Request,
+            name: Optional[str] = Form(None),
+            description: Optional[str] = Form(None),
+            price: Optional[float] = Form(None),
+            stock: Optional[int] = Form(None),
+            image: Optional[UploadFile] = None,
         ) -> Product:
             product = self._check_product_id(id)
 
-            if schema.name is not None:
-                product.name = schema.name
-            if schema.description is not None:
-                product.description = schema.description
-            if schema.price is not None:
-                product.price = schema.price
-            if schema.stock is not None:
-                product.stock = schema.stock
+            try:
+                schema = UpdateProductSchema(
+                    name=name, description=description, price=price, stock=stock
+                )
+                if name is not None:
+                    product.name = name
+                if description is not None:
+                    product.description = description
+                if price is not None:
+                    product.price = price
+                if stock is not None:
+                    product.stock = stock
 
-            return self.inventory_service.update_product(product)
+                product = self.inventory_service.update_product(product)
+
+                if image is not None and image.filename is not None:
+                    delete_file(f"{PRODUCT_IMAGE_PATH}/{product.id}")
+                    ext = os.path.splitext(image.filename)[1]
+                    write_file(image, f"{PRODUCT_IMAGE_PATH}/{product.id}{ext}")
+
+                return product
+            except ValueError as e:
+                raise HTTPException(status_code=422, detail=str(e))
 
         @self.delete("/{id}", dependencies=[Depends(manager_auth_middleware)])
         async def remove_product(id: str, request: Request) -> Dict[str, str]:
@@ -77,5 +118,6 @@ class ProductController(APIRouter):
                 raise HTTPException(
                     status_code=404, detail=f"Product with id {id} not available"
                 )
+            delete_file(f"{PRODUCT_IMAGE_PATH}/{id}")
             self.inventory_service.remove_product(product)
             return {"message": f"Product with id {id} removed successfully"}

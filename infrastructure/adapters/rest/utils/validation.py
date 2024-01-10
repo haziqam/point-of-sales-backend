@@ -2,10 +2,11 @@ import re
 
 PIN_LENGTH = 6
 MIN_PASSWORD_LENGTH = 8
+EMAIL_REGEX = r"^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$"
 
 
 def validate_email(email: str) -> bool:
-    match = re.match(r"^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$", email)
+    match = re.match(EMAIL_REGEX, email)
     if match is None:
         raise ValueError("Invalid email format")
     return True

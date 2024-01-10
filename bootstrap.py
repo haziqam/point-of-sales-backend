@@ -2,6 +2,7 @@ import os
 from typing import Any, Callable
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware import Middleware
+from fastapi.staticfiles import StaticFiles
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from infrastructure.adapters.db.mongodb.repositories.cash import CashRepository
@@ -109,5 +110,6 @@ def start_app() -> FastAPI:
     base_router.include_router(controller_container.report_controller)
     base_router.include_router(controller_container.user_controller)
     app.include_router(base_router)
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
     return app
