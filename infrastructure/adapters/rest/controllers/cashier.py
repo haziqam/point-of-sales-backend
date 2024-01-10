@@ -1,33 +1,21 @@
 from typing import List, Optional, Tuple
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, validator
+from fastapi import APIRouter, Depends, HTTPException, Request
 from core.models.bill import Bill
 from core.models.product import Product
 from core.services.cashier import CashierService
 from core.services.inventory import InventoryService
 from core.services.member import MemberService
 from exceptions.transaction_exception import TransactionException
-
-
-class ProductPurchaseSchema(BaseModel):
-    id: str
-    amount: int
-
-    @validator("amount")
-    def validate_amount(cls, value: int):
-        if value <= 0:
-            raise ValueError("Product amount must be at least one")
-
-
-class PurchaseSchema(BaseModel):
-    products: List[ProductPurchaseSchema]
-    member_id: Optional[str]
-    points_used: Optional[float]
-
-    @validator("points_used")
-    def validate_points_used(cls, value: Optional[float]):
-        if value is not None and value < 0:
-            raise ValueError("Negative points are not allowed")
+from infrastructure.adapters.rest.schemas.purchase import (
+    PurchaseSchema,
+    ProductPurchaseSchema,
+)
+from infrastructure.adapters.rest.middlewares.cashier_auth import (
+    cashier_auth_middleware,
+)
+from infrastructure.adapters.rest.middlewares.member_auth import (
+    member_payment_auth_middleware,
+)
 
 
 class CashierController(APIRouter):
@@ -44,8 +32,15 @@ class CashierController(APIRouter):
         self._assign_routes()
 
     def _assign_routes(self):
-        @self.post("/payment")
-        async def purchase(schema: PurchaseSchema) -> Bill:
+        @self.post(
+            "/payment",
+            dependencies=[
+                Depends(cashier_auth_middleware),
+                Depends(member_payment_auth_middleware),
+            ],
+        )
+        async def purchase(schema: PurchaseSchema, request: Request) -> Bill:
+            request.cookies.pop("member-jwt")
             products_to_purchase: List[Tuple[Product, int]] = []
             for product in schema.products:
                 found_product = self.inventory_service.find_product_by_id(product.id)

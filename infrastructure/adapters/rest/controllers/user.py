@@ -1,8 +1,9 @@
-from typing import Dict
-from fastapi import APIRouter, HTTPException
-from adapters.rest.schemas.response_message import ResponseMessageSchema
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from core.models.user import PublicUserData
 from core.services.user import UserService
+from infrastructure.adapters.rest.schemas.response_message import ResponseMessageSchema
+from infrastructure.adapters.rest.utils.jwt_utils import encode_jwt
 from infrastructure.adapters.rest.schemas.user import (
     UserLoginSchema,
     UserRegistrationSchema,
@@ -12,6 +13,8 @@ from exceptions.auth_exception import (
     UserAlreadyExists,
     UserNotFound,
 )
+
+USER_LOGIN_EXPIRY_TIME = timedelta(hours=2)
 
 
 class UserController(APIRouter):
@@ -32,16 +35,31 @@ class UserController(APIRouter):
                 )
 
         @self.put("/session")
-        async def login(schema: UserLoginSchema) -> PublicUserData:
+        async def login(
+            schema: UserLoginSchema,
+            response: Response,
+        ) -> PublicUserData:
             try:
-                return self.user_service.login(**schema.dict())
+                public_data = self.user_service.login(**schema.dict())
+                token_payload = public_data.copy(
+                    update={"role": public_data.role.name}
+                ).dict()
+                token = encode_jwt(token_payload, USER_LOGIN_EXPIRY_TIME)
+                response.set_cookie(
+                    key="user-jwt",
+                    value=token,
+                    max_age=int(USER_LOGIN_EXPIRY_TIME.total_seconds()),
+                    httponly=True,
+                    samesite="strict",
+                )
+                return public_data
             except UserNotFound:
                 raise HTTPException(
-                    status_code=404,
+                    status_code=401,
                     detail=f"User with email ({schema.email}) not found",
                 )
             except InvalidCredentials:
-                raise HTTPException(status_code=400, detail=f"Wrong password")
+                raise HTTPException(status_code=401, detail=f"Wrong password")
 
         @self.delete("/")
         async def delete_user(id: str) -> ResponseMessageSchema:
