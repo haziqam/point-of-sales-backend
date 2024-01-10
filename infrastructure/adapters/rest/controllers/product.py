@@ -1,42 +1,14 @@
 from typing import Dict, List, Optional
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, validator
+from fastapi import APIRouter, Depends, HTTPException, Request
 from core.models.product import Product
 from core.services.inventory import InventoryService
-
-
-class ProductSchema(BaseModel):
-    name: str
-    description: str
-    price: float
-    stock: int
-
-    @validator("price")
-    def validate_price(cls, value):
-        if value < 0:
-            raise ValueError("Price cannot be negative")
-
-    @validator("stock")
-    def validate_stock(cls, value):
-        if value < 0:
-            raise ValueError("Stock cannot be negative")
-
-
-class UpdateProductSchema(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[float] = None
-    stock: Optional[int] = None
-
-    @validator("price")
-    def validate_price(cls, value):
-        if value < 0:
-            raise ValueError("Price cannot be negative")
-
-    @validator("stock")
-    def validate_stock(cls, value):
-        if value < 0:
-            raise ValueError("Stock cannot be negative")
+from infrastructure.adapters.rest.middlewares.manager_auth import (
+    manager_auth_middleware,
+)
+from infrastructure.adapters.rest.schemas.product import (
+    ProductSchema,
+    UpdateProductSchema,
+)
 
 
 class ProductController(APIRouter):
@@ -54,16 +26,17 @@ class ProductController(APIRouter):
         return product
 
     def _assign_routes(self):
-        @self.post("/")
-        async def insert_product(schema: ProductSchema) -> Product:
+        @self.post("/", dependencies=[Depends(manager_auth_middleware)])
+        async def insert_product(schema: ProductSchema, request: Request) -> Product:
             return self.inventory_service.insert_product(**schema.dict())
 
-        @self.get("/{id}")
+        @self.get("/{id}", dependencies=[Depends(manager_auth_middleware)])
         async def find_product_by_id(id: str) -> Product:
             return self._check_product_id(id)
 
-        @self.get("/")
+        @self.get("/", dependencies=[Depends(manager_auth_middleware)])
         async def find_products(
+            request: Request,
             name: Optional[str] = None,
             description: Optional[str] = None,
             price: Optional[float] = None,
@@ -80,8 +53,10 @@ class ProductController(APIRouter):
                 stock=stock,
             )
 
-        @self.patch("/{id}")
-        async def update_product(id: str, schema: UpdateProductSchema) -> Product:
+        @self.patch("/{id}", dependencies=[Depends(manager_auth_middleware)])
+        async def update_product(
+            id: str, schema: UpdateProductSchema, request: Request
+        ) -> Product:
             product = self._check_product_id(id)
 
             if schema.name is not None:
@@ -95,8 +70,8 @@ class ProductController(APIRouter):
 
             return self.inventory_service.update_product(product)
 
-        @self.delete("/{id}")
-        async def remove_product(id: str) -> Dict[str, str]:
+        @self.delete("/{id}", dependencies=[Depends(manager_auth_middleware)])
+        async def remove_product(id: str, request: Request) -> Dict[str, str]:
             product = self.inventory_service.find_product_by_id(id)
             if product is None:
                 raise HTTPException(
