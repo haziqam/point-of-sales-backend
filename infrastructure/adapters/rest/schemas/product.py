@@ -12,11 +12,13 @@ class ProductSchema(BaseModel):
     def validate_price(cls, value):
         if value < 0:
             raise ValueError("Price cannot be negative")
+        return value
 
     @validator("stock")
     def validate_stock(cls, value):
         if value < 0:
             raise ValueError("Stock cannot be negative")
+        return value
 
 
 class UpdateProductSchema(BaseModel):
@@ -29,8 +31,10 @@ class UpdateProductSchema(BaseModel):
     def validate_price(cls, value):
         if value < 0:
             raise ValueError("Price cannot be negative")
+        return value
 
     @validator("stock")
     def validate_stock(cls, value):
         if value < 0:
             raise ValueError("Stock cannot be negative")
+        return value
