@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI
+from typing import Any, Callable
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.middleware import Middleware
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from infrastructure.adapters.db.mongodb.repositories.cash import CashRepository
@@ -29,12 +31,6 @@ from core.services.user import UserService
 from security.bcrypt.hasher import BCryptPasswordHasher
 
 load_dotenv()
-
-
-def include_documentation(app: FastAPI) -> None:
-    @app.get(app.root_path + "/openapi.json")
-    def custom_swagger_ui_html():
-        return app.openapi()
 
 
 def start_app() -> FastAPI:
@@ -105,12 +101,13 @@ def start_app() -> FastAPI:
         ),
     )
 
-    app = FastAPI(root_path="/api/v1")
-    app.include_router(controller_container.cahsier_controller)
-    app.include_router(controller_container.member_controller)
-    app.include_router(controller_container.product_controller)
-    app.include_router(controller_container.report_controller)
-    app.include_router(controller_container.user_controller)
-    include_documentation(app)
+    app = FastAPI()
+    base_router = APIRouter(prefix="/api/v1")
+    base_router.include_router(controller_container.cahsier_controller)
+    base_router.include_router(controller_container.member_controller)
+    base_router.include_router(controller_container.product_controller)
+    base_router.include_router(controller_container.report_controller)
+    base_router.include_router(controller_container.user_controller)
+    app.include_router(base_router)
 
     return app
