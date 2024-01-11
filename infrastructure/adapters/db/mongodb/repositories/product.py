@@ -48,9 +48,9 @@ class ProductRepository(IProductRepository, MongoDBRepository):
         if description is not None:
             filter["description"] = {"$regex": description, "$options": "i"}
         if price is not None:
-            filter["price"] = {"$regex": price, "$options": "i"}
+            filter["price"] = price
         if stock is not None:
-            filter["stock"] = {"$regex": stock, "$options": "i"}
+            filter["stock"] = stock
 
         cursor: Cursor = (
             self.collection.find(filter)
