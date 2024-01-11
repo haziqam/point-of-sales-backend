@@ -8,7 +8,6 @@ from core.services.member import MemberService
 from exceptions.transaction_exception import TransactionException
 from infrastructure.adapters.rest.schemas.purchase import (
     PurchaseSchema,
-    ProductPurchaseSchema,
 )
 from infrastructure.adapters.rest.middlewares.cashier_auth import (
     cashier_auth_middleware,
@@ -40,7 +39,7 @@ class CashierController(APIRouter):
             ],
         )
         async def purchase(schema: PurchaseSchema, request: Request) -> Bill:
-            request.cookies.pop("member-jwt")
+            request.cookies.pop("member-jwt", None)
             products_to_purchase: List[Tuple[Product, int]] = []
             for product in schema.products:
                 found_product = self.inventory_service.find_product_by_id(product.id)
