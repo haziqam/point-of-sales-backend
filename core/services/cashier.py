@@ -82,7 +82,7 @@ class CashierService:
         points_used: float = 0.0,
         **kwargs
     ) -> Bill:
-        purchased_products = self._process_products(products_to_purchase)
+        purchased_products = self._process_products(products_to_purchase, **kwargs)
         subtotal_price = self._calculate_subtotal_price(purchased_products)
         discount = 0.0
 
@@ -92,7 +92,7 @@ class CashierService:
                 member, subtotal_price, points_used
             )
             discount = self._get_discount_amount(member, subtotal_price)
-            self._processs_member_data(member, points_used, subtotal_price)
+            self._processs_member_data(member, points_used, subtotal_price, **kwargs)
 
         self.cash_repository.add_cash(total_price, **kwargs)
 

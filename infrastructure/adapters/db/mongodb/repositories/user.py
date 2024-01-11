@@ -10,12 +10,14 @@ class UserRepository(IUserRepository, MongoDBRepository):
     def create_user(
         self, name: str, role: Role, email: str, hashed_password: str, **kwargs
     ) -> User:
+        session = kwargs.get("session", None)
         result = self.collection.insert_one(
             {
                 "public_data": {"name": name, "role": role.value},
                 "email": email,
                 "hashed_password": hashed_password,
             },
+            session=session,
         )
         id = str(result.inserted_id)
         public_data = PublicUserData(id=id, name=name, role=role)
@@ -25,7 +27,8 @@ class UserRepository(IUserRepository, MongoDBRepository):
         return new_user
 
     def find_user_by_id(self, id: str, **kwargs) -> Optional[User]:
-        result = self.collection.find_one({"_id": ObjectId(id)})
+        session = kwargs.get("session", None)
+        result = self.collection.find_one({"_id": ObjectId(id)}, session=session)
         if result is None:
             return None
 
@@ -34,7 +37,8 @@ class UserRepository(IUserRepository, MongoDBRepository):
         return found_user
 
     def find_user_by_email(self, email: str, **kwargs) -> Optional[User]:
-        result = self.collection.find_one({"email": email})
+        session = kwargs.get("session", None)
+        result = self.collection.find_one({"email": email}, session=session)
         if result is None:
             return None
 
@@ -43,12 +47,16 @@ class UserRepository(IUserRepository, MongoDBRepository):
         return found_user
 
     def update_user(self, user: User, **kwargs) -> User:
+        session = kwargs.get("session", None)
         set_dict = user.dict()
         set_dict["public_data"].pop("id")
         self.collection.update_one(
-            {"_id": ObjectId(user.public_data.id)}, {"$set": set_dict}
+            {"_id": ObjectId(user.public_data.id)}, {"$set": set_dict}, session=session
         )
         return user
 
     def delete_user(self, user: User, **kwargs) -> None:
-        self.collection.delete_one({"_id": ObjectId(user.public_data.id)})
+        session = kwargs.get("session", None)
+        self.collection.delete_one(
+            {"_id": ObjectId(user.public_data.id)}, session=session
+        )

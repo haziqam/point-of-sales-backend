@@ -9,6 +9,7 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
     def create_member(
         self, email: str, hashed_PIN: str, name: str, points: float = 0.0, **kwargs
     ) -> Member:
+        session = kwargs.get("session", None)
         result = self.collection.insert_one(
             {
                 "public_data": {"name": name, "points": points},
@@ -16,6 +17,7 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
                 "hashed_PIN": hashed_PIN,
                 "type": "Member",
             },
+            session=session,
         )
         id = str(result.inserted_id)
         public_data = PublicMemberData(id=id, name=name, points=points)
@@ -23,7 +25,8 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
         return new_member
 
     def find_member_by_id(self, id: str, **kwargs) -> Optional[Member]:
-        result = self.collection.find_one({"_id": ObjectId(id)})
+        session = kwargs.get("session", None)
+        result = self.collection.find_one({"_id": ObjectId(id)}, session=session)
         if result is None:
             return None
 
@@ -37,7 +40,8 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
         return found_member
 
     def find_member_by_email(self, email: str, **kwargs) -> Optional[Member]:
-        result = self.collection.find_one({"email": email})
+        session = kwargs.get("session", None)
+        result = self.collection.find_one({"email": email}, session=session)
         if result is None:
             return None
 
@@ -51,6 +55,7 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
         return found_member
 
     def update_member(self, member: Member, **kwargs) -> Member:
+        session = kwargs.get("session", None)
         set_dict = member.dict()
         set_dict["public_data"].pop("id", None)
         set_dict["type"] = member.get_member_type()
@@ -61,8 +66,12 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
         self.collection.update_one(
             {"_id": ObjectId(member.public_data.id)},
             {"$set": set_dict, "$unset": unset_dict},
+            session=session,
         )
         return member
 
     def delete_member(self, member: Member, **kwargs) -> None:
-        self.collection.delete_one({"_id": ObjectId(member.public_data.id)})
+        session = kwargs.get("session", None)
+        self.collection.delete_one(
+            {"_id": ObjectId(member.public_data.id)}, session=session
+        )

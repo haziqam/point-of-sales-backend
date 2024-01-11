@@ -17,6 +17,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
         discount: float = 0.0,
         **kwargs
     ) -> Bill:
+        session = kwargs.get("session", None)
         result = self.collection.insert_one(
             {
                 "transaction_date": transaction_date,
@@ -25,7 +26,8 @@ class BillRepository(IBillRepository, MongoDBRepository):
                 "total_price": total_price,
                 "points_used": points_used,
                 "discount": discount,
-            }
+            },
+            session=session,
         )
         bill = Bill(
             id=str(result.inserted_id),

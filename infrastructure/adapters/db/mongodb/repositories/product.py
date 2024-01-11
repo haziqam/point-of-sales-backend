@@ -10,8 +10,10 @@ class ProductRepository(IProductRepository, MongoDBRepository):
     def create_product(
         self, name: str, description: str, price: float, stock: int, **kwargs
     ) -> Product:
+        session = kwargs.get("session", None)
         result = self.collection.insert_one(
-            {"name": name, "description": description, "price": price, "stock": stock}
+            {"name": name, "description": description, "price": price, "stock": stock},
+            session=session,
         )
         new_product = Product(
             id=str(result.inserted_id),
@@ -23,7 +25,8 @@ class ProductRepository(IProductRepository, MongoDBRepository):
         return new_product
 
     def find_product_by_id(self, id: str, **kwargs) -> Optional[Product]:
-        result = self.collection.find_one({"_id": ObjectId(id)})
+        session = kwargs.get("session", None)
+        result = self.collection.find_one({"_id": ObjectId(id)}, session=session)
         if result is None:
             return None
 
@@ -41,6 +44,7 @@ class ProductRepository(IProductRepository, MongoDBRepository):
         stock: Optional[int] = None,
         **kwargs
     ) -> List[Product]:
+        session = kwargs.get("session", None)
         filter = {}
 
         if name is not None:
@@ -53,7 +57,7 @@ class ProductRepository(IProductRepository, MongoDBRepository):
             filter["stock"] = stock
 
         cursor: Cursor = (
-            self.collection.find(filter)
+            self.collection.find(filter, session=session)
             .skip((page - 1) * number_per_page)
             .limit(number_per_page)
         )
@@ -65,10 +69,14 @@ class ProductRepository(IProductRepository, MongoDBRepository):
         return search_result
 
     def update_product(self, product: Product, **kwargs) -> Product:
+        session = kwargs.get("session", None)
         set_dict = product.dict()
         set_dict.pop("id", None)
-        self.collection.update_one({"_id": ObjectId(product.id)}, {"$set": set_dict})
+        self.collection.update_one(
+            {"_id": ObjectId(product.id)}, {"$set": set_dict}, session=session
+        )
         return product
 
     def delete_product(self, product: Product, **kwargs) -> None:
-        self.collection.delete_one({"_id": ObjectId(product.id)})
+        session = kwargs.get("session", None)
+        self.collection.delete_one({"_id": ObjectId(product.id)}, session=session)
