@@ -72,9 +72,9 @@ def start_app() -> FastAPI:
             repository_container.member_repository, security_container.hasher
         ),
         ReportService(
-            repository_container.product_repository,
             repository_container.bill_repository,
-            transaction_container.transaction_provider,
+            repository_container.member_repository,
+            repository_container.cash_repository,
         ),
         UserService(
             repository_container.user_repository,
@@ -96,6 +96,7 @@ def start_app() -> FastAPI:
         ),
         ReportController(
             service_container.report_service,
+            service_container.inventory_service,
         ),
         UserController(
             service_container.user_service,

@@ -6,6 +6,9 @@ from core.services.inventory import InventoryService
 from infrastructure.adapters.rest.middlewares.manager_auth import (
     manager_auth_middleware,
 )
+from infrastructure.adapters.rest.middlewares.cashier_manager_auth import (
+    cashier_or_manager_auth_middleware,
+)
 from infrastructure.adapters.rest.schemas.product import (
     ProductSchema,
     UpdateProductSchema,
@@ -52,11 +55,11 @@ class ProductController(APIRouter):
             except ValueError as e:
                 raise HTTPException(status_code=422, detail=str(e))
 
-        @self.get("/{id}", dependencies=[Depends(manager_auth_middleware)])
+        @self.get("/{id}", dependencies=[Depends(cashier_or_manager_auth_middleware)])
         async def find_product_by_id(id: str) -> Product:
             return self._check_product_id(id)
 
-        @self.get("/", dependencies=[Depends(manager_auth_middleware)])
+        @self.get("/", dependencies=[Depends(cashier_or_manager_auth_middleware)])
         async def find_products(
             request: Request,
             name: Optional[str] = None,

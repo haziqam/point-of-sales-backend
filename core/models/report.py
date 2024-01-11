@@ -8,6 +8,7 @@ T = TypeVar("T")
 class MonthlyReport(BaseModel, Generic[T]):
     month: int
     data: T
+    data_name: str
 
     @validator("month")
     def validate_month(cls, value: int):

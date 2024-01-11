@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import Dict, Optional, cast
 from bson.objectid import ObjectId
 from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.member import Member, PublicMemberData, VIPMember
@@ -75,3 +75,24 @@ class MemberRepository(IMemberRepository, MongoDBRepository):
         self.collection.delete_one(
             {"_id": ObjectId(member.public_data.id)}, session=session
         )
+
+    def get_member_amount_by_type(self, **kwargs) -> Dict[str, int]:
+        """
+        Returns:
+            A dictionary with member type as the key and amount as the value
+        """
+        session = kwargs.get("session", None)
+        cursor = self.collection.aggregate(
+            [
+                {"$group": {"_id": "$type", "amount": {"$count": {}}}},
+                {"$set": {"type": "$_id"}},
+                {"$unset": ["_id"]},
+            ],
+            session=session,
+        )
+
+        aggregation_result: Dict[str, int] = {}
+        for doc in cursor:
+            aggregation_result[doc["type"]] = doc["amount"]
+
+        return aggregation_result
