@@ -1,14 +1,15 @@
+from datetime import datetime
 from typing import List
-from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.bill import Bill
 from core.models.product import PurchasedProduct
 from core.repositories.bill import IBillRepository
+from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 
 
 class BillRepository(IBillRepository, MongoDBRepository):
     def create_bill(
         self,
-        transaction_date: str,
+        transaction_date: datetime,
         purchased_products: List[PurchasedProduct],
         subtotal_price: float,
         total_price: float,

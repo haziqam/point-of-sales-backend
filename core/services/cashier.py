@@ -97,7 +97,7 @@ class CashierService:
         self.cash_repository.add_cash(total_price, **kwargs)
 
         bill = self.bill_repository.create_bill(
-            str(datetime.now()),
+            datetime.now(),
             purchased_products,
             subtotal_price,
             total_price,
