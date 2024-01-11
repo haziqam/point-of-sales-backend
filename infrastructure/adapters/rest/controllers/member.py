@@ -41,7 +41,6 @@ class MemberController(APIRouter):
             "/",
             dependencies=[
                 Depends(cashier_auth_middleware),
-                Depends(member_auth_middleware),
             ],
         )
         async def register(schema: MemberRegistrationSchema) -> PublicMemberData:
