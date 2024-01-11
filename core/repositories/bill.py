@@ -19,3 +19,29 @@ class IBillRepository(ABC):
         **kwargs
     ) -> Bill:
         pass
+
+    @abstractmethod
+    def get_purchased_products(
+        self, start_date: datetime, end_date: datetime, **kwargs
+    ) -> List[PurchasedProduct]:
+        pass
+
+    @abstractmethod
+    def get_total_transactions(
+        self, start_date: datetime, end_date: datetime, **kwargs
+    ) -> int:
+        pass
+
+    @abstractmethod
+    def get_total_revenue(
+        self, start_date: datetime, end_date: datetime, **kwargs
+    ) -> float:
+        pass
+
+    @abstractmethod
+    def get_monthly_transactions(self, year: int) -> List[MonthlyReport[int]]:
+        pass
+
+    @abstractmethod
+    def get_monthly_sold_products(self, year: int) -> List[MonthlyReport[int]]:
+        pass
