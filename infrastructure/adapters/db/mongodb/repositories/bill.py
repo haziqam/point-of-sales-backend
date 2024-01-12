@@ -51,7 +51,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
                     "$match": {
                         "transaction_date": {
                             "$gte": start_date,
-                            "$lte": end_date,
+                            "$lt": end_date,
                         }
                     }
                 },
@@ -87,7 +87,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
                 filter={
                     "transaction_date": {
                         "$gte": start_date,
-                        "$lte": end_date,
+                        "$lt": end_date,
                     }
                 },
                 session=session,
@@ -104,7 +104,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
                     "$match": {
                         "transaction_date": {
                             "$gte": start_date,
-                            "$lte": end_date,
+                            "$lt": end_date,
                         }
                     }
                 },
@@ -128,7 +128,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
                     "$match": {
                         "transaction_date": {
                             "$gte": datetime(year=year, month=1, day=1),
-                            "$lte": datetime(year=year, month=12, day=1),
+                            "$lt": datetime(year=year, month=12, day=1),
                         }
                     }
                 },
@@ -165,7 +165,7 @@ class BillRepository(IBillRepository, MongoDBRepository):
                     "$match": {
                         "transaction_date": {
                             "$gte": datetime(year=year, month=1, day=1),
-                            "$lte": datetime(year=year, month=12, day=1),
+                            "$lt": datetime(year=year, month=12, day=1),
                         }
                     }
                 },

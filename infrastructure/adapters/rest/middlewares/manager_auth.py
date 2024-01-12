@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 from exceptions.auth_exception import ExpiredToken, InvalidToken
 from infrastructure.adapters.rest.utils.jwt_utils import verify_jwt
 

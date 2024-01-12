@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends
 from core.models.product import Product, PurchasedProduct
@@ -8,6 +8,7 @@ from core.services.report import ReportService
 from infrastructure.adapters.rest.middlewares.manager_auth import (
     manager_auth_middleware,
 )
+from infrastructure.adapters.rest.utils.date_utils import convert_date_range
 
 
 class ReportController(APIRouter):
@@ -24,19 +25,26 @@ class ReportController(APIRouter):
             "/purchased-products", dependencies=[Depends(manager_auth_middleware)]
         )
         def get_purchased_products(
-            start_date: datetime, end_date: datetime
+            start_date: date, end_date: date
         ) -> List[PurchasedProduct]:
-            return self.report_service.get_purchased_products(start_date, end_date)
+            start_datetime, end_datetime = convert_date_range(start_date, end_date)
+            return self.report_service.get_purchased_products(
+                start_datetime, end_datetime
+            )
 
         @self.get(
             "/total_transactions", dependencies=[Depends(manager_auth_middleware)]
         )
-        def get_total_transactions(start_date: datetime, end_date: datetime) -> int:
-            return self.report_service.get_total_transactions(start_date, end_date)
+        def get_total_transactions(start_date: date, end_date: date) -> int:
+            start_datetime, end_datetime = convert_date_range(start_date, end_date)
+            return self.report_service.get_total_transactions(
+                start_datetime, end_datetime
+            )
 
         @self.get("/total-revenue", dependencies=[Depends(manager_auth_middleware)])
-        def get_total_revenue(start_date: datetime, end_date: datetime) -> float:
-            return self.report_service.get_total_revenue(start_date, end_date)
+        def get_total_revenue(start_date: date, end_date: date) -> float:
+            start_datetime, end_datetime = convert_date_range(start_date, end_date)
+            return self.report_service.get_total_revenue(start_datetime, end_datetime)
 
         @self.get(
             "/monthly_transactions", dependencies=[Depends(manager_auth_middleware)]
