@@ -1,6 +1,6 @@
 __pycache__
 .vscode
 .env
-.key
+*.key
 static/*
 !/static/.gitkeep

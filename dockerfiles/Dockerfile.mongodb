@@ -1,0 +1,7 @@
+FROM mongo:latest
+
+WORKDIR /usr/src
+
+COPY mongo.key .
+
+RUN chmod 400 mongo.key && chown mongodb:mongodb mongo.key
