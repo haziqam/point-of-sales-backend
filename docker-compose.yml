@@ -19,9 +19,8 @@ services:
             dockerfile: dockerfiles/Dockerfile.mongodb
         ports:
             - 27018:27017
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: your_username
-            MONGO_INITDB_ROOT_PASSWORD: your_password
+        env_file:
+            - .env
         command:
             [
                 "mongod",
