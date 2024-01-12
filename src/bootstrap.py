@@ -5,6 +5,7 @@ from fastapi.middleware import Middleware
 from fastapi.staticfiles import StaticFiles
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from infrastructure.adapters.db.mongodb.create_index import create_index
 from infrastructure.adapters.db.mongodb.repositories.cash import CashRepository
 from infrastructure.adapters.db.mongodb.repositories.member import MemberRepository
 from infrastructure.adapters.db.mongodb.repositories.product import ProductRepository
@@ -40,6 +41,8 @@ def start_app() -> FastAPI:
             os.getenv("CONN_STRING", "mongodb://localhost:27017/?replicaSet=rs0")
         )
     )
+
+    create_index(db_container.db)
 
     repository_container = RepositoryContainer(
         BillRepository(db_container.db.bill),
