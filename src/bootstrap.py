@@ -1,7 +1,5 @@
 import os
-from typing import Any, Callable
-from fastapi import APIRouter, FastAPI, Request
-from fastapi.middleware import Middleware
+from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 from pymongo import MongoClient
 from dotenv import load_dotenv
