@@ -12,7 +12,7 @@ def cashier_or_manager_auth_middleware(request: Request):
     try:
         payload = verify_jwt(token)
         role = payload["role"]
-        if role != "MANAGER" or role != "CASHIER":
+        if role != "MANAGER" and role != "CASHIER":
             raise HTTPException(
                 status_code=403,
                 detail="Request unauthorized for roles other than MANAGER or CASHIER",
