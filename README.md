@@ -67,15 +67,12 @@ A web service that provides functionalities for product purchase, product invent
 
     // Initiate the replica set
     rs.initiate()
-
-
     ```
 
 -   [Optional] Import the product mock data
 
     ```
     mongoimport --host localhost:27017 --username your_username --password your_password --db PosDB --collection product --drop --file /usr/src/product_mock.json --authenticationDatabase admin --jsonArray
-
     ```
 
 -   Access the API documentation through http://localhost:8000/docs#/ and try out the APIs
