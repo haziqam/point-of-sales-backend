@@ -11,6 +11,8 @@ services:
             - 8000:8000
         volumes:
             - ./src:/usr/src/app
+        depends_on:
+            - mongodb
         command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
     mongodb:
