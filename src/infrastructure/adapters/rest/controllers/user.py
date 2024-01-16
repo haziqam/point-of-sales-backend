@@ -1,7 +1,10 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from core.models.user import PublicUserData
 from core.services.user import UserService
+from infrastructure.adapters.rest.middlewares.manager_auth import (
+    manager_auth_middleware,
+)
 from infrastructure.adapters.rest.schemas.response_message import ResponseMessageSchema
 from infrastructure.adapters.rest.utils.jwt_utils import encode_jwt
 from infrastructure.adapters.rest.schemas.user import (
@@ -61,7 +64,7 @@ class UserController(APIRouter):
             except InvalidCredentials:
                 raise HTTPException(status_code=401, detail=f"Wrong password")
 
-        @self.delete("/")
+        @self.delete("/", dependencies=[Depends(manager_auth_middleware)])
         async def delete_user(id: str) -> ResponseMessageSchema:
             user = self.user_service.find_user_by_id(id)
             if user is None:

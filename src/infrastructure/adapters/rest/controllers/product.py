@@ -35,7 +35,6 @@ class ProductController(APIRouter):
     def _assign_routes(self):
         @self.post("/", dependencies=[Depends(manager_auth_middleware)])
         async def insert_product(
-            request: Request,
             name: str = Form(...),
             description: str = Form(...),
             price: float = Form(...),
@@ -61,7 +60,6 @@ class ProductController(APIRouter):
 
         @self.get("/", dependencies=[Depends(cashier_or_manager_auth_middleware)])
         async def find_products(
-            request: Request,
             name: Optional[str] = None,
             description: Optional[str] = None,
             price: Optional[float] = None,
@@ -81,7 +79,6 @@ class ProductController(APIRouter):
         @self.patch("/{id}", dependencies=[Depends(manager_auth_middleware)])
         async def update_product(
             id: str,
-            request: Request,
             name: Optional[str] = Form(None),
             description: Optional[str] = Form(None),
             price: Optional[float] = Form(None),
@@ -115,7 +112,7 @@ class ProductController(APIRouter):
                 raise HTTPException(status_code=422, detail=str(e))
 
         @self.delete("/{id}", dependencies=[Depends(manager_auth_middleware)])
-        async def remove_product(id: str, request: Request) -> Dict[str, str]:
+        async def remove_product(id: str) -> Dict[str, str]:
             product = self.inventory_service.find_product_by_id(id)
             if product is None:
                 raise HTTPException(
