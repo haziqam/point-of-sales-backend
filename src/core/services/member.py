@@ -53,11 +53,21 @@ class MemberService:
         return matching_member.public_data, matching_member.get_member_type()
 
     def upgrade_to_VIP(self, member: Member) -> Tuple[PublicMemberData, str]:
+        """
+        Returns:
+            A tuple containing the public member data
+            and the member type
+        """
         vip_member = VIPMember.from_member(member)
         self.member_repository.update_member(vip_member)
         return vip_member.public_data, vip_member.get_member_type()
 
     def cancel_VIP(self, member: Member) -> Tuple[PublicMemberData, str]:
+        """
+        Returns:
+            A tuple containing the public member data
+            and the member type
+        """
         member = Member(
             public_data=member.public_data,
             email=member.email,

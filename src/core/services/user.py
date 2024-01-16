@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional, Tuple
 from core.models.user import PublicUserData, Role, User
 from core.repositories.user import IUserRepository
 from security.hasher import IPasswordHasher
@@ -52,3 +52,23 @@ class UserService:
 
     def delete_user(self, user: User) -> None:
         self.user_repository.delete_user(user)
+
+    def find_users(
+        self,
+        page: int = 1,
+        number_per_page: int = 10,
+        *,
+        id: Optional[str] = None,
+        email: Optional[str] = None,
+        name: Optional[str] = None,
+        role: Optional[Role] = None,
+    ) -> List[Tuple[PublicUserData, str]]:
+        """
+        Returns:
+            A list of tuple containing the public user data
+            and the user's email
+        """
+        users = self.user_repository.find_users(
+            page, number_per_page, id=id, email=email, name=name, role=role
+        )
+        return list(map(lambda user: (user.public_data, user.email), users))

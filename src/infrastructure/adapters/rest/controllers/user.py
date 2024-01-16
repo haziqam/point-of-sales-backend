@@ -1,6 +1,7 @@
 from datetime import timedelta
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Response
-from core.models.user import PublicUserData
+from core.models.user import PublicUserData, Role
 from core.services.user import UserService
 from infrastructure.adapters.rest.middlewares.manager_auth import (
     manager_auth_middleware,
@@ -8,6 +9,7 @@ from infrastructure.adapters.rest.middlewares.manager_auth import (
 from infrastructure.adapters.rest.schemas.response_message import ResponseMessageSchema
 from infrastructure.adapters.rest.utils.jwt_utils import encode_jwt
 from infrastructure.adapters.rest.schemas.user import (
+    UserDataSchema,
     UserLoginSchema,
     UserRegistrationSchema,
 )
@@ -75,4 +77,23 @@ class UserController(APIRouter):
             self.user_service.delete_user(user)
             return ResponseMessageSchema(
                 message=f"User with id {id} deleted successfully"
+            )
+
+        @self.get("/", dependencies=[Depends(manager_auth_middleware)])
+        async def find_users(
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            email: Optional[str] = None,
+            role: Optional[Role] = None,
+            page: int = 1,
+            number_per_page: int = 10,
+        ) -> List[UserDataSchema]:
+            users = self.user_service.find_users(
+                page, number_per_page, id=id, email=email, name=name, role=role
+            )
+            return list(
+                map(
+                    lambda user: UserDataSchema(public_data=user[0], email=user[1]),
+                    users,
+                )
             )

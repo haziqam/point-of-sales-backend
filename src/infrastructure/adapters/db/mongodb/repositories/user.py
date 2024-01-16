@@ -1,5 +1,5 @@
-from typing import Optional
-
+from typing import Optional, List
+from pymongo.cursor import Cursor
 from bson import ObjectId
 from infrastructure.adapters.db.mongodb.base_repository import MongoDBRepository
 from core.models.user import PublicUserData, Role, User
@@ -60,3 +60,38 @@ class UserRepository(IUserRepository, MongoDBRepository):
         self.collection.delete_one(
             {"_id": ObjectId(user.public_data.id)}, session=session
         )
+
+    def find_users(
+        self,
+        page: int = 1,
+        number_per_page: int = 10,
+        *,
+        id: Optional[str] = None,
+        email: Optional[str] = None,
+        name: Optional[str] = None,
+        role: Optional[Role] = None,
+        **kwargs
+    ) -> List[User]:
+        session = kwargs.get("session", None)
+        filter = {}
+
+        if id is not None:
+            filter["_id"] = ObjectId(id)
+        if name is not None:
+            filter["public_data.name"] = {"$regex": name, "$options": "i"}
+        if email is not None:
+            filter["email"] = {"$regex": email, "$options": "i"}
+        if role is not None:
+            filter["public_data.role"] = role.value
+
+        cursor: Cursor = (
+            self.collection.find(filter, session=session)
+            .skip((page - 1) * number_per_page)
+            .limit(number_per_page)
+        )
+        search_result: List[User] = []
+        for doc in cursor:
+            doc["public_data"]["id"] = str(doc.pop("_id"))
+            search_result.append(User(**doc))
+
+        return search_result
